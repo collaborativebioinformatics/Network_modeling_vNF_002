@@ -5,19 +5,19 @@ into low-dimensional synthetic nodes until no new high-dimensional edges
 are created. Edge assignment uses Shannon entropy scoring to determine
 whether a high-dim edge should migrate or duplicate across nodes.
 
------
+---
 
 ## Pipeline Steps
 
-|Step|Process         |Description                                  |
-|----|----------------|---------------------------------------------|
-|1   |`VALIDATE_INPUT`|Parse and validate CSV/TSV input files       |
-|2   |`BUILD_GRAPH`   |Construct initial anchor graph               |
-|3   |`EXPAND_NODES`  |Iterative synthetic node generation          |
-|4   |`SCORE_ENTROPY` |Shannon entropy scoring and edge reassignment|
-|5   |`SUMMARIZE`     |Final output files and summary report        |
+| Step | Process | Description |
+|------|---------|-------------|
+| 1 | `VALIDATE_INPUT` | Parse and validate CSV/TSV input files |
+| 2 | `BUILD_GRAPH` | Construct initial anchor graph |
+| 3 | `EXPAND_NODES` | Iterative synthetic node generation |
+| 4 | `SCORE_ENTROPY` | Shannon entropy scoring and edge reassignment |
+| 5 | `SUMMARIZE` | Final output files and summary report |
 
------
+---
 
 ## Requirements
 
@@ -25,20 +25,18 @@ whether a high-dim edge should migrate or duplicate across nodes.
 - [Docker](https://www.docker.com/) (or Singularity for HPC)
 - RAPIDS (optional, for GPU acceleration)
 
------
+---
 
 ## Input Files
 
 ### nodes.csv / nodes.tsv
-
-|Column         |Description                                               |
-|---------------|----------------------------------------------------------|
-|`id`           |Unique node identifier (int or string)                    |
-|`high_dim_edge`|Identifier of the high-dim edge this anchor holds         |
-|`v_0`, `v_1`, …|High-dimensional feature vector (one column per dimension)|
+| Column | Description |
+|--------|-------------|
+| `id` | Unique node identifier (int or string) |
+| `high_dim_edge` | Identifier of the high-dim edge this anchor holds |
+| `v_0`, `v_1`, ... | High-dimensional feature vector (one column per dimension) |
 
 Example:
-
 ```
 id,high_dim_edge,v_0,v_1,v_2,...
 0,hd_edge_A,0.374,0.951,0.732,...
@@ -46,14 +44,12 @@ id,high_dim_edge,v_0,v_1,v_2,...
 ```
 
 ### edges.csv / edges.tsv
-
-|Column  |Description   |
-|--------|--------------|
-|`source`|Source node ID|
-|`target`|Target node ID|
+| Column | Description |
+|--------|-------------|
+| `source` | Source node ID |
+| `target` | Target node ID |
 
 Example:
-
 ```
 source,target
 0,1
@@ -61,12 +57,11 @@ source,target
 1,3
 ```
 
------
+---
 
 ## Usage
 
 ### Local (CPU)
-
 ```bash
 nextflow run main.nf \
   --nodes data/nodes.csv \
@@ -75,7 +70,6 @@ nextflow run main.nf \
 ```
 
 ### Local with custom parameters
-
 ```bash
 nextflow run main.nf \
   --nodes data/nodes.csv \
@@ -89,7 +83,6 @@ nextflow run main.nf \
 ```
 
 ### HPC (SLURM)
-
 ```bash
 nextflow run main.nf \
   --nodes data/nodes.csv \
@@ -98,7 +91,6 @@ nextflow run main.nf \
 ```
 
 ### AWS Batch
-
 ```bash
 # Update nextflow.config with your queue name, region, and S3 bucket first
 nextflow run main.nf \
@@ -109,7 +101,6 @@ nextflow run main.nf \
 ```
 
 ### Google Cloud
-
 ```bash
 # Update nextflow.config with your project and GCS bucket first
 nextflow run main.nf \
@@ -119,21 +110,21 @@ nextflow run main.nf \
   -profile gcp
 ```
 
------
+---
 
 ## Parameters
 
-|Parameter            |Default  |Description                                           |
-|---------------------|---------|------------------------------------------------------|
-|`--nodes`            |required |Path to nodes CSV/TSV                                 |
-|`--edges`            |required |Path to edges CSV/TSV                                 |
-|`--similarity`       |`0.8`    |Cosine similarity threshold for high-dim edge creation|
-|`--entropy_threshold`|`0.95`   |Shannon entropy cutoff for edge duplication           |
-|`--low_dim`          |`8`      |Dimensionality of synthetic node embeddings           |
-|`--max_rounds`       |`50`     |Maximum expansion rounds before forced stop           |
-|`--outdir`           |`results`|Output directory                                      |
+| Parameter | Default | Description |
+|-----------|---------|-------------|
+| `--nodes` | required | Path to nodes CSV/TSV |
+| `--edges` | required | Path to edges CSV/TSV |
+| `--similarity` | `0.8` | Cosine similarity threshold for high-dim edge creation |
+| `--entropy_threshold` | `0.95` | Shannon entropy cutoff for edge duplication |
+| `--low_dim` | `8` | Dimensionality of synthetic node embeddings |
+| `--max_rounds` | `50` | Maximum expansion rounds before forced stop |
+| `--outdir` | `results` | Output directory |
 
------
+---
 
 ## Output Files
 
@@ -165,7 +156,7 @@ results/
 └── pipeline_dag.svg              # Pipeline DAG diagram
 ```
 
------
+---
 
 ## GPU Acceleration
 
@@ -173,16 +164,15 @@ The pipeline uses RAPIDS (cuGraph + cuPy) when available.
 The Docker image defaults to CPU. For GPU:
 
 1. Use the RAPIDS base image in `nextflow.config`:
-   
    ```
    process.container = 'nvcr.io/nvidia/rapidsai/base:24.10-cuda12.5-py3.12'
    ```
-1. Ensure your compute environment has NVIDIA drivers and `--gpus all`
+2. Ensure your compute environment has NVIDIA drivers and `--gpus all`
    passed to Docker (already set in `nextflow.config`).
-1. For SLURM, Singularity will be used automatically — update the
+3. For SLURM, Singularity will be used automatically — update the
    `.sif` path in the `slurm` profile.
 
------
+---
 
 ## Plugging in Real Co-occurrence Data
 
@@ -190,6 +180,6 @@ The entropy scoring step (`bin/score_entropy.py`) currently uses
 neighbor-set overlap as a proxy for co-occurrence. To use real data:
 
 1. Prepare a co-occurrence matrix or frequency table for your high-dim edges.
-1. Replace the `cooccurrence_score()` function in `bin/score_entropy.py`
+2. Replace the `cooccurrence_score()` function in `bin/score_entropy.py`
    with a lookup into your data.
-1. Re-run the pipeline — all other steps are unaffected.
+3. Re-run the pipeline — all other steps are unaffected.
